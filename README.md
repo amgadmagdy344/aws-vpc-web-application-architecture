@@ -10,7 +10,7 @@ multiple Availability Zones following AWS best practices.
 ---
 
 ## 🏗 Architecture Diagram
-![VPC Architecture](diagrams/vpc-architecture.png)
+![AWS VPC Architecture](diagrams/architecture.png)
 
 ---
 
