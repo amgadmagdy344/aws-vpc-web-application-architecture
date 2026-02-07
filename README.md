@@ -36,7 +36,7 @@ multiple Availability Zones following AWS best practices.
 
 ---
 
-## 📚 What I Learned (So Far)
+## 📚 What I Learned 
 - Designing multi-AZ VPC architectures
 - Difference between public and private subnets
 - Secure routing and internet access control
