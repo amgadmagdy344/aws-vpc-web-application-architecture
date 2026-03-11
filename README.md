@@ -43,7 +43,7 @@ The domain will resolve to the CloudFront distribution which delivers the applic
 
 Example:
 
-www.projectapp.com
+https://www.linkedin.com/in/amgad-magdy-932756325/
       ↓
 Route53 Hosted Zone
       ↓
