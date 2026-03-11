@@ -29,6 +29,28 @@ subnet design, routing, and internet access.
 This diagram extends the initial design by adding compute resources and IAM-based
 access control for users and applications.
 
+🔹 Domain & DNS Management
+
+The application domain will be registered and managed using Amazon Route 53.
+
+Route 53 will provide:
+- Domain registration
+- DNS resolution
+- Health checks
+- High availability DNS routing
+
+The domain will resolve to the CloudFront distribution which delivers the application globally.
+
+Example:
+
+www.projectapp.com
+      ↓
+Route53 Hosted Zone
+      ↓
+CloudFront Distribution
+      ↓
+Application Load Balancer
+
 ![Extended Architecture with IAM & EC2](diagrams/draw-v2.png)
 
 > Both diagrams are intentionally preserved to demonstrate the architectural
