@@ -41,16 +41,6 @@ Route 53 will provide:
 
 The domain will resolve to the CloudFront distribution which delivers the application globally.
 
-Example:
-
-https://www.linkedin.com/in/amgad-magdy-932756325/
-      ↓
-Route53 Hosted Zone
-      ↓
-CloudFront Distribution
-      ↓
-Application Load Balancer
-
 ![Extended Architecture with IAM & EC2](diagrams/draw-v2.png)
 
 > Both diagrams are intentionally preserved to demonstrate the architectural
