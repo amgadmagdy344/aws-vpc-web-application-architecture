@@ -1,4 +1,4 @@
-#  AWS Multi-Tier Highly Available Web Application Architecture
+#  Enterprise-Grade AWS Multi-Tier Web Architecture
 
 ---
 
