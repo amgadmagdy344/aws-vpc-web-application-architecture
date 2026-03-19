@@ -1,140 +1,218 @@
-# AWS VPC Web Application Architecture
+# 🏆 AWS Multi-Tier Highly Available Web Application Architecture
+
+---
 
 ## 📌 Project Overview
-This project demonstrates the design and implementation of a secure, scalable,
-and highly available AWS VPC architecture for hosting a multi-tier web application.
 
-The architecture is designed following AWS best practices with a focus on:
-- Network segmentation
-- Layer 4 security controls
-- IAM-based access management
-- High availability across multiple Availability Zones
+This project demonstrates the design and implementation of a **secure, scalable, and highly available multi-tier web application architecture on AWS**.
 
-🚧 **This project is a work in progress and will be continuously enhanced to
-include additional AWS services and production-grade features.**
+The solution follows AWS best practices and the AWS Well-Architected Framework, focusing on:
 
----
-
-## 🏗 Architecture Diagrams
-
-### 🔹 Initial Network Architecture
-This diagram represents the initial VPC networking foundation, including
-subnet design, routing, and internet access.
-
-![Initial VPC Architecture](diagrams/draw.png)
+* High Availability (Multi-AZ deployment)
+* Layer 4 Security Controls (NACLs & Security Groups)
+* IAM-based secure access (Users, Roles, Programmatic access)
+* Global performance optimization
+* Decoupled architecture for scalability
+* Data encryption at rest
 
 ---
 
-### 🔹 Extended Architecture (In Progress)
-This diagram extends the initial design by adding compute resources and IAM-based
-access control for users and applications.
+## 🏗 Architecture Overview
 
-🔹 Domain & DNS Management
+The application is deployed inside a custom **Amazon VPC (10.0.0.0/16)** with a multi-tier design:
 
-The application domain will be registered and managed using Amazon Route 53.
+### 🔹 Subnet Design
 
-Route 53 will provide:
-- Domain registration
-- DNS resolution
-- Health checks
-- High availability DNS routing
-
-The domain will resolve to the CloudFront distribution which delivers the application globally.
-
-![Extended Architecture with IAM & EC2](diagrams/draw-v2.png)
-
-> Both diagrams are intentionally preserved to demonstrate the architectural
-> evolution of the project.
+| Subnet Type      | CIDR          | AZ   |
+| ---------------- | ------------- | ---- |
+| Public Subnet 1  | 10.0.10.0/24  | AZ-1 |
+| Public Subnet 2  | 10.0.20.0/24  | AZ-2 |
+| Private Subnet 1 | 10.0.100.0/24 | AZ-1 |
+| Private Subnet 2 | 10.0.200.0/24 | AZ-2 |
 
 ---
 
-## 📋 Current Scope
-- VPC (10.0.0.0/16)
-- 2 Public Subnets (Multi-AZ)
-- 2 Private Subnets (Multi-AZ)
-- Internet Gateway
-- Route Tables
-- S3 VPC Endpoint
-- IAM Users and Groups
-- IAM Roles for EC2
-- EBS-backed EC2 instances (Multi-AZ)
+## 🌐 Traffic Flow (End-to-End)
+
+1. Users access the application via domain name.
+2. DNS is managed using Amazon Route 53.
+3. Requests are routed to Amazon CloudFront for global edge delivery.
+4. Traffic is forwarded to an Application Load Balancer.
+5. ALB distributes requests across EC2 instances in private subnets.
+6. Application communicates asynchronously via Amazon SQS.
+7. Backend data is stored in Amazon RDS (Multi-AZ).
 
 ---
 
 ## ☁️ AWS Services Used
-- Amazon VPC
-- Subnets
-- Route Tables
-- Internet Gateway
-- VPC Endpoint (S3)
-- Amazon EC2
-- IAM (Users, Groups, Roles, Policies)
+
+* Amazon VPC
+* Subnets (Public & Private)
+* Internet Gateway & NAT Gateways
+* Amazon EC2 (EBS-backed instances)
+* Application Load Balancer
+* Amazon RDS (Multi-AZ)
+* Amazon SQS
+* Amazon CloudFront
+* Amazon Route 53
+* AWS IAM
+* VPC Endpoints (S3)
 
 ---
 
 ## 🔐 Security & Access Control Design
 
-### 🔹 Network-Level Security (Layer 4)
-- Network ACLs control inbound and outbound traffic at the subnet level.
-- Public subnets allow only required ports (HTTP/HTTPS).
-- Private subnets accept traffic only from trusted internal sources.
-- Direct internet access to private subnets is restricted.
+### 🔹 Layer 4 Security
 
-### 🔹 Instance-Level Security (Layer 4)
-- Security Groups act as instance-level firewalls.
-- Access is restricted following the principle of least privilege.
-- Administrative access is limited to authorized users only.
+#### Subnet Level (NACLs)
+
+* Public subnets allow only:
+
+  * HTTP (80)
+  * HTTPS (443)
+* Private subnets:
+
+  * Accept traffic only from ALB
+  * Deny direct internet access
+
+#### Instance Level (Security Groups)
+
+* ALB Security Group:
+
+  * Allow inbound 80/443 from internet
+* EC2 Security Group:
+
+  * Allow inbound only from ALB
+* RDS Security Group:
+
+  * Allow inbound only from application servers
 
 ---
 
-## 👥 IAM & Programmatic Access Design
+## 🖥 Compute Layer
 
-### 🔹 IAM Users and Groups
-- IAM Users are created for **Administrators** and **Developers**.
-- Users are organized into IAM Groups:
-  - **Admins Group**: Administrative permissions.
-  - **Developers Group**: Limited permissions based on job responsibilities.
-- Programmatic access is enabled for interaction with AWS services using:
-  - AWS CLI
-  - AWS SDKs
-  - Automation tools
+* Two Amazon EC2 instances:
+
+  * One in each AZ
+* EBS-backed storage
+* Deployed in private subnets (no direct public access)
 
 ---
 
-### 🔹 IAM Roles for EC2 Instances
-- EC2 instances are assigned an IAM Role to securely access AWS services.
-- The role provides controlled access to services such as:
-  - Amazon S3
-  - Amazon CloudWatch
-- No AWS credentials are stored in application code or configuration files.
-- Applications retrieve temporary credentials via the Instance Metadata Service (IMDS).
+## 👥 IAM & Programmatic Access
+
+* AWS IAM is used for:
+
+  * Admins → Full access
+  * Developers → Limited access
+* Programmatic access via:
+
+  * AWS CLI
+  * SDKs
+
+### 🔹 EC2 IAM Roles
+
+* Secure access to:
+
+  * S3
+  * CloudWatch
+* No hardcoded credentials
+
+---
+
+## 🌍 Global Performance Optimization
+
+* Amazon CloudFront:
+
+  * Caches content at edge locations
+* Amazon Route 53:
+
+  * Latency-based routing
+  * Health checks
+
+---
+
+## 🗄 Database Layer
+
+* Amazon RDS deployed in **Multi-AZ**
+* Automatic failover in case of primary failure
+* Database Subnet Group (private subnets only)
+
+---
+
+## 🔐 Data Encryption
+
+* RDS encryption enabled (KMS)
+* EBS volumes encrypted
+* Data encrypted at rest
+
+---
+
+## 🔄 Decoupling Layer
+
+* Amazon SQS is used to:
+
+  * Decouple application tier from database
+  * Handle traffic spikes
+  * Improve reliability
+
+---
+
+## 📈 High Availability & Scalability
+
+* Multi-AZ deployment
+* Load Balancer distributes traffic
+* Fault tolerance across AZs
+* (Planned) Auto Scaling Group
+
+---
+
+## 🏗 Final Architecture Diagram
+
+This diagram represents the complete production-ready architecture of the system,
+including networking, compute, security, database, and global performance components.
+
+The design follows AWS best practices for:
+
+* High Availability (Multi-AZ)
+* Security (Layer 4 controls using NACLs & Security Groups)
+* Scalability and decoupling using SQS
+* Global content delivery using CloudFront
+* Fault-tolerant database with RDS Multi-AZ
+
+![Final Architecture](diagrams/final-architecture.png)
+
+> This architecture was designed to simulate a real-world production environment on AWS.
+
+---
+
+## 🚀 Future Enhancements
+
+* Auto Scaling Group (ASG)
+* Bastion Host
+* CI/CD Pipeline
+* Monitoring with CloudWatch & Alarms
+* Infrastructure as Code (Terraform / CloudFormation)
 
 ---
 
 ## 📚 What I Learned
-- Designing multi-AZ VPC architectures
-- Applying Layer 4 security using NACLs and Security Groups
-- Implementing IAM-based access control
-- Using IAM Roles for secure application access to AWS services
-- Building secure and scalable cloud foundations
 
----
-
-## 🚀 Planned Enhancements
-- Application Load Balancer (ALB)
-- Auto Scaling Group (ASG)
-- Bastion Host
-- Monitoring and logging with CloudWatch
-- CI/CD pipeline integration
-- Infrastructure as Code (Terraform / CloudFormation)
+* Designing production-grade AWS architectures
+* Implementing secure multi-tier environments
+* Applying IAM best practices
+* Building highly available systems
+* Decoupling applications using queues
 
 ---
 
 ## 🎯 Design Philosophy
-This project aligns with the AWS Well-Architected Framework, emphasizing:
-- Security
-- Reliability
-- Scalability
-- Operational Excellence
 
+Aligned with AWS Well-Architected Framework:
+
+* Security
+* Reliability
+* Performance Efficiency
+* Cost Optimization
+* Operational Excellence
 
