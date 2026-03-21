@@ -156,7 +156,7 @@ The application is deployed inside a custom **Amazon VPC (10.0.0.0/16)** with a 
 
 ## 🏗 Final Architecture Diagram
 
-![Final Architecture](diagrams/final-architecture.png)
+![Final Architecture](final-architecture.png)
 
 > This architecture was designed to simulate a real-world production environment on AWS.
 
